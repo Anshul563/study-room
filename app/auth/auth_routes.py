@@ -32,10 +32,12 @@ def google_login(payload: dict, db: Session = Depends(get_db)):
     if not user:
 
         user = User(
-            username=google_user["name"],
+            username=google_user.get("name", ""),
+            first_name=google_user.get("given_name", ""),
+            last_name=google_user.get("family_name", ""),
             email=google_user["email"],
             google_id=google_user["google_id"],
-            avatar=google_user["picture"],
+            avatar=google_user.get("picture", ""),
             password=""
         )
 
@@ -53,6 +55,8 @@ def google_login(payload: dict, db: Session = Depends(get_db)):
         "user": {
             "id": user.id,
             "username": user.username,
+            "first_name": user.first_name,
+            "last_name": user.last_name,
             "email": user.email,
             "avatar": user.avatar
         }
@@ -73,6 +77,8 @@ def register(user: RegisterSchema, db: Session = Depends(get_db)):
 
     new_user = User(
         username=user.username,
+        first_name=user.first_name,
+        last_name=user.last_name,
         email=user.email,
         password=hash_password(user.password)
     )
@@ -121,6 +127,8 @@ def login(
         "user": {
             "id": existing_user.id,
             "username": existing_user.username,
+            "first_name": existing_user.first_name,
+            "last_name": existing_user.last_name,
             "email": existing_user.email,
             "avatar": existing_user.avatar
         }
