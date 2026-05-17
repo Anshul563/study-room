@@ -38,7 +38,22 @@ class Message(Base):
 
     content = Column(
         String,
-        nullable=False
+        nullable=True
+    )
+
+    file_url = Column(
+        String,
+        nullable=True
+    )
+
+    file_name = Column(
+        String,
+        nullable=True
+    )
+
+    file_type = Column(
+        String,
+        nullable=True
     )
 
     created_at = Column(

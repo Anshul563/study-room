@@ -75,6 +75,9 @@ async def websocket_chat(
                     "id": new_message.id,
                     "username": username,
                     "message": new_message.content,
+                    "file_url": new_message.file_url,
+                    "file_name": new_message.file_name,
+                    "file_type": new_message.file_type,
                     "created_at": str(
                         new_message.created_at
                     )

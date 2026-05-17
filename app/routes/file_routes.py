@@ -83,3 +83,70 @@ def get_room_files(
     ).all()
 
     return files
+
+from fastapi import Form
+from typing import Optional
+from app.models.message import Message
+from app.websocket.manager import manager
+
+@router.post("/chat-upload/{room_id}")
+async def chat_upload_file(
+    room_id: str,
+    file: UploadFile = File(...),
+    user_id: str = Form(...),
+    username: str = Form(...),
+    upload_token: Optional[str] = Form(None),
+    db: Session = Depends(get_db)
+):
+    unique_filename = f"{uuid.uuid4()}-{file.filename}"
+    file_url = upload_file_to_r2(file.file, unique_filename)
+
+    # Determine file type
+    content_type = file.content_type
+    if content_type and content_type.startswith("image/"):
+        file_type = "image"
+    elif content_type == "application/pdf":
+        file_type = "pdf"
+    else:
+        file_type = "other"
+
+    new_message = Message(
+        room_id=room_id,
+        user_id=user_id,
+        username=username,
+        content="",
+        file_url=file_url,
+        file_name=file.filename,
+        file_type=file_type
+    )
+
+    db.add(new_message)
+    db.commit()
+    db.refresh(new_message)
+
+    # Broadcast message to room
+    await manager.broadcast(
+        room_id,
+        {
+            "type": "message",
+            "id": new_message.id,
+            "username": username,
+            "message": new_message.content,
+            "file_url": new_message.file_url,
+            "file_name": new_message.file_name,
+            "file_type": new_message.file_type,
+            "created_at": str(new_message.created_at)
+        }
+    )
+
+    if upload_token:
+        # Broadcast success event to dismiss modal
+        await manager.broadcast(
+            room_id,
+            {
+                "type": "mobile_upload_success",
+                "token": upload_token
+            }
+        )
+
+    return {"message": "File sent in chat", "file_url": file_url}
