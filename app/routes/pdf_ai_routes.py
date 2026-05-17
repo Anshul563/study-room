@@ -44,7 +44,7 @@ router = APIRouter(
 
 @router.post("/process/{file_id}")
 def process_pdf(
-    file_id: int,
+    file_id: str,
     db: Session = Depends(get_db)
 ):
 
@@ -61,12 +61,16 @@ def process_pdf(
 
     os.makedirs("temp", exist_ok=True)
 
-    response = requests.get(
-        file.file_url
-    )
+    from app.services.r2_service import s3
+    from app.config import settings
 
-    with open(temp_path, "wb") as f:
-        f.write(response.content)
+    unique_filename = file.file_url.split("/")[-1]
+
+    s3.download_file(
+        settings.R2_BUCKET_NAME,
+        unique_filename,
+        temp_path
+    )
 
     text = extract_pdf_text(
         temp_path

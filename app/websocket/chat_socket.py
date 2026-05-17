@@ -56,7 +56,7 @@ async def websocket_chat(
 
             # Chat Message
             new_message = Message(
-                room_id=int(room_id),
+                room_id=room_id,
                 user_id=data["user_id"],
                 username=username,
                 content=data["message"]
@@ -82,15 +82,21 @@ async def websocket_chat(
             )
 
     except WebSocketDisconnect:
-
+        pass
+    except Exception as e:
+        print(f"WebSocket error in room {room_id}: {e}")
+    finally:
         manager.disconnect(
             room_id,
             websocket,
             username
         )
 
-        await manager.send_online_users(
-            room_id
-        )
+        try:
+            await manager.send_online_users(
+                room_id
+            )
+        except Exception:
+            pass
 
         db.close()

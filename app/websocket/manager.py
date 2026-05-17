@@ -38,12 +38,12 @@ class ConnectionManager:
         username: str
     ):
 
-        self.active_connections[room_id].remove(
-            websocket
-        )
+        if room_id in self.active_connections and websocket in self.active_connections[room_id]:
+            self.active_connections[room_id].remove(
+                websocket
+            )
 
-        if username in self.online_users[room_id]:
-
+        if room_id in self.online_users and username in self.online_users[room_id]:
             self.online_users[room_id].remove(
                 username
             )
@@ -53,13 +53,20 @@ class ConnectionManager:
         room_id: str,
         message: dict
     ):
+        dead_connections = []
 
         for connection in self.active_connections.get(
             room_id,
             []
         ):
+            try:
+                await connection.send_json(message)
+            except Exception:
+                dead_connections.append(connection)
 
-            await connection.send_json(message)
+        for dead in dead_connections:
+            if dead in self.active_connections[room_id]:
+                self.active_connections[room_id].remove(dead)
 
     async def send_online_users(
         self,

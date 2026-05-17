@@ -1,12 +1,12 @@
 from sqlalchemy import (
     Column,
-    Integer,
     String,
     ForeignKey,
     DateTime
 )
 
 from sqlalchemy.sql import func
+from nanoid import generate
 
 from app.database import Base
 
@@ -15,17 +15,18 @@ class File(Base):
     __tablename__ = "files"
 
     id = Column(
-        Integer,
-        primary_key=True
+        String,
+        primary_key=True,
+        default=generate
     )
 
     room_id = Column(
-        Integer,
+        String,
         ForeignKey("rooms.id")
     )
 
     user_id = Column(
-        Integer,
+        String,
         ForeignKey("users.id")
     )
 

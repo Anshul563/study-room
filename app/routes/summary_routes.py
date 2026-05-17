@@ -15,7 +15,7 @@ router = APIRouter(
 
 @router.get("/{room_id}")
 def get_room_summaries(
-    room_id: int,
+    room_id: str,
     db: Session = Depends(get_db)
 ):
 

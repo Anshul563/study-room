@@ -30,7 +30,7 @@ router = APIRouter(
 
 @router.post("/upload/{room_id}")
 async def upload_file(
-    room_id: int,
+    room_id: str,
 
     file: UploadFile = File(...),
 
@@ -74,7 +74,7 @@ async def upload_file(
 
 @router.get("/{room_id}")
 def get_room_files(
-    room_id: int,
+    room_id: str,
     db: Session = Depends(get_db)
 ):
 

@@ -12,7 +12,7 @@ router = APIRouter(
 
 @router.get("/{room_id}")
 def get_room_messages(
-    room_id: int,
+    room_id: str,
     db: Session = Depends(get_db)
 ):
 
